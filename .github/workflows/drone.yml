@@ -1,7 +1,7 @@
 name: Scout drone
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/30 * * * *"  # backup; Hive wakes via repository_dispatch
   workflow_dispatch:
   repository_dispatch:
     types: [hive_wake]
