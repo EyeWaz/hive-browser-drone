@@ -183,9 +183,11 @@ async function main() {
   if (hb.guide_version) await readGuide(hb.guide_version);
   for (const m of hb.messages || []) {
     await hive("POST", `/api/messages/${m.id}/ack`);
-    if (m.kind === "prompt" && (m.source === "admin" || m.source === "manager")) {
-      try { const a = await think(`Prompt from ${m.source}: ${m.body}\nReply under 120 words.`, { max: 300 }); await hive("POST", `/api/messages/${m.id}/reply`, { body: a.slice(0, 3900) }); }
-      catch { await hive("POST", `/api/messages/${m.id}/reply`, { body: "Received. Brain error; will retry next run." }); }
+    if ((m.kind === "prompt" || m.kind === "message") && (m.source === "admin" || m.source === "manager")) {
+      try {
+        const a = await think(`Direct ${m.kind} from ${m.source === "admin" ? "Ron" : "Volt"}:\n"""${m.body}"""\nAnswer conversationally and helpfully in under 150 words. If it is a prompt with work to do, say what you will do.`, { max: 400 });
+        await hive("POST", `/api/messages/${m.id}/reply`, { body: a.slice(0, 3900) });
+      } catch { await hive("POST", `/api/messages/${m.id}/reply`, { body: "Got it. My brain hit an error; I will try again next check-in." }); }
     }
   }
   if (hb.paused || hb.halted) { log("paused"); return; }
